@@ -1,100 +1,230 @@
-<div align="center">
-  <h1>DevTrace 🚀</h1>
-  <p>
-    <strong>A production-grade distributed observability platform that turns microservice failures into a story an engineer can actually understand.</strong>
-  </p>
-  
-  [![Build Status](https://img.shields.io/github/actions/workflow/status/karthu097/DevTrace/backend.yml?branch=main&label=Build&style=for-the-badge)](https://github.com/karthu097/DevTrace/actions)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-  [![Made with Spring Boot](https://img.shields.io/badge/Spring_Boot-F2F4F9?style=for-the-badge&logo=spring-boot)](https://spring.io/projects/spring-boot)
-  [![React UI](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-</div>
+# DevTrace 🚀
 
-<br />
+**DevTrace is a distributed observability platform that helps developers detect, trace, and investigate failures in microservice applications.**
+
+It collects OpenTelemetry traces, reconstructs distributed requests, identifies the root cause of failures, and generates an easy-to-understand incident report.
 
 ---
 
-## 🛑 The 2 AM Nightmare
+## 🎯 Problem
 
-You're sound asleep. Your phone buzzes. *PagerDuty.* 
+Debugging a microservice failure often requires checking multiple services, logs, traces, and monitoring tools.
 
-You groggily open your laptop, load up Datadog, Jaeger, Kibana, and CloudWatch. You've got 15 tabs open. You're trying to manually piece together Trace IDs to figure out why the `checkout` service is throwing a `500 Internal Server Error`. 
+For example:
 
-Was it the Payment Provider? The Inventory Database? A random network timeout? You're guessing. You're manually digging through thousands of JSON logs.
+```text
+API Gateway
+    ↓
+Order Service
+    ↓
+Payment Service ❌
+    ↓
+Database
+```
 
-## 🟢 Enter DevTrace
+Finding the actual cause can take significant time.
 
-DevTrace completely automates the incident investigation process. 
-
-It ingests OpenTelemetry data, reconstructs your distributed trace, runs a deterministic **Root-Cause Analysis (RCA)** algorithm to pinpoint the exact failing dependency, and leverages AI to write a human-readable incident report based on sanitized logs.
-
-*No more manual log hunting. No more guessing.*
-
----
-
-## ✨ What makes DevTrace special?
-
-1. **📦 Built-in Microservices Simulator:** You don't need a massive architecture to test this. DevTrace ships with a fully Dockerized e-commerce simulator (API Gateway, Order, Inventory, Payment services) that generates continuous OTLP traffic.
-2. **🌳 Trace Reconstruction Engine:** Assembles flat, out-of-order spans back into hierarchical dependency trees.
-3. **🎯 Deterministic RCA:** Calculates the "critical path" of a request and isolates the absolute root cause of a failure.
-4. **🧠 AI Investigator:** Analyzes sanitized evidence (scrubbed of passwords, CCs, and tokens) to generate an incident summary and actionable next steps.
-5. **🎨 Beautiful React UI:** A dark-mode, high-density dashboard featuring dynamic Trace Waterfalls and Node Graphs.
+**DevTrace brings this information together in one place.**
 
 ---
 
-## 🛠️ Architecture at a Glance
+## ✨ Features
 
-DevTrace is composed of three massive pillars working in harmony:
+### 🔍 Distributed Trace Reconstruction
 
-- **Observability Pipeline:** Microservices instrumented with OpenTelemetry send gRPC/HTTP Spans to an OTEL Collector, which batches them.
-- **DevTrace Engine (Backend):** A Java 21 / Spring Boot brain that persists traces in PostgreSQL, runs the RCA algorithms, and sanitizes data for AI.
-- **Developer UI (Frontend):** A React / Vite SPA rendering real-time dependency topology with React Flow.
+Reconstructs out-of-order OpenTelemetry spans into a complete request hierarchy.
 
-> Curious about the gritty details? Check out the [Architecture Deep Dive](docs/architecture.md)!
+### 🎯 Root Cause Analysis
+
+Analyzes failed requests and their dependencies to identify the most likely root cause.
+
+### 🤖 AI Incident Investigator
+
+Uses sanitized logs and trace information to generate:
+
+* Incident summary
+* Root cause
+* Affected services
+* Suggested next steps
+
+### 📊 Trace Visualization
+
+Interactive dashboard showing:
+
+* Trace waterfalls
+* Service dependencies
+* Request latency
+* Failed services
+* Error propagation
+
+### 🧪 Microservices Simulator
+
+Includes a Dockerized e-commerce system for generating realistic distributed traffic.
+
+Services include:
+
+* API Gateway
+* Order Service
+* Inventory Service
+* Payment Service
+
+### 🚨 Failure Simulation
+
+Simulate common production failures such as:
+
+* Payment timeout
+* Service failure
+* Database errors
+* Network failures
 
 ---
 
-## 🚀 Let's Get You Up and Running!
+## 🏗️ Architecture
 
-DevTrace is fully containerized. You can spin up the *entire* cluster with a single command.
+```text
+                  ┌──────────────────┐
+                  │ Microservices    │
+                  │                  │
+                  │ Gateway          │
+                  │ Order            │
+                  │ Inventory        │
+                  │ Payment          │
+                  └────────┬─────────┘
+                           │
+                    OpenTelemetry
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ OTEL Collector   │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ DevTrace Backend │
+                  │                  │
+                  │ Trace Engine     │
+                  │ RCA Engine       │
+                  │ AI Investigator  │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │   PostgreSQL     │
+                  └──────────────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ React Dashboard  │
+                  └──────────────────┘
+```
 
-### 1. Clone & Configure
+---
+
+## 🛠️ Tech Stack
+
+| Category       | Technologies            |
+| -------------- | ----------------------- |
+| Backend        | Java 21, Spring Boot 3  |
+| Database       | PostgreSQL, Flyway      |
+| Frontend       | React, TypeScript, Vite |
+| Visualization  | React Flow              |
+| Observability  | OpenTelemetry, Jaeger   |
+| Infrastructure | Docker, Docker Compose  |
+| Security       | Spring Security         |
+| CI/CD          | GitHub Actions          |
+| AI             | OpenAI API              |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+
 ```bash
 git clone https://github.com/karthu097/DevTrace.git
 cd DevTrace
+```
 
-# Set up your environment variables
+### 2. Configure environment variables
+
+```bash
 cp .env.example .env
 ```
-*(Optional: Open `.env` and add your OpenAI API Key if you want to see the AI Investigator in action. Otherwise, it will safely mock the AI response).*
 
-### 2. Ignite the Cluster 🔥
+Add your OpenAI API key to `.env` if you want to enable the AI Investigator.
+
+> The application can also run with a mock AI response.
+
+### 3. Start DevTrace
+
 ```bash
 docker compose -f docker-compose.prod.yml up --build -d
 ```
-Docker will now download, compile, and launch all 10 containers (UI, Backend, Database, Telemetry, and the 5 Simulator services). Give it a minute or two to warm up!
 
-### 3. See it in Action
-Open your browser and navigate to [http://localhost:3000](http://localhost:3000). You'll see healthy traffic flowing through your system.
+This starts the DevTrace backend, frontend, database, telemetry infrastructure, and microservice simulator.
 
-### 4. 🚨 Break Everything! (The Fun Part)
-Want to see DevTrace earn its keep? Open a new terminal and run this command to simulate a catastrophic payment timeout in the upstream services:
+### 4. Open the dashboard
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+You should see distributed traffic and service activity.
+
+---
+
+## 🚨 Test Failure Detection
+
+You can simulate a payment timeout:
+
 ```bash
 curl -X POST http://localhost:8085/api/demo/incidents/payment-timeout
 ```
-Now, switch back to the DevTrace Dashboard. You will instantly see the system turn red, the failure propagate, and the AI automatically explain exactly what happened!
+
+DevTrace will:
+
+```text
+Detect Failure
+      ↓
+Reconstruct Trace
+      ↓
+Analyze Dependencies
+      ↓
+Identify Root Cause
+      ↓
+Generate Incident Report
+```
 
 ---
 
 ## 📚 Documentation
-- [Architecture & Design](docs/architecture.md)
-- [Live Demo Script](docs/demo.md) (Perfect for showing this project off in an interview!)
 
-## 💻 Tech Stack
-- **Backend:** Java 21, Spring Boot 3, PostgreSQL, Flyway, Spring Security
-- **Frontend:** React, TypeScript, Vite, Tailwind CSS, TanStack Query, React Flow
-- **Observability:** OpenTelemetry, Jaeger
-- **Infrastructure:** Docker, Docker Compose, GitHub Actions, Kubernetes
+* [Architecture & Design](https://github.com/karthu097/DevTrace/blob/main/docs/architecture.md)
+* [Live Demo Guide](https://github.com/karthu097/DevTrace/blob/main/docs/demo.md)
 
 ---
-*Built with ❤️ (and a lot of coffee) by [karthu097](https://github.com/karthu097).*
+
+## 🎯 Project Goals
+
+DevTrace was built to demonstrate practical knowledge of:
+
+* Distributed systems
+* Microservices architecture
+* Observability
+* OpenTelemetry
+* Root-cause analysis
+* REST APIs
+* Database design
+* Docker containerization
+* React-based visualization
+* AI-assisted incident investigation
+
+---
+
+## 👨‍💻 Author
+
+**karthu097**
+
+Built as a hands-on project to explore distributed systems, backend engineering, and observability.
