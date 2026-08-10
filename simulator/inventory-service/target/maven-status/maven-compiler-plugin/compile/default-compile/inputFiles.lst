@@ -1,0 +1,12 @@
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\controller\InventoryController.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\entity\InventoryItem.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\exception\ErrorCode.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\exception\ErrorResponse.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\exception\GlobalExceptionHandler.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\exception\ServiceException.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\InventoryServiceApplication.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\logging\StructuredLogger.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\model\FailureMode.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\model\Product.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\repository\InventoryRepository.java
+C:\Users\karth\Downloads\DevTrace\simulator\inventory-service\src\main\java\com\devtrace\inventory\service\InventoryService.java

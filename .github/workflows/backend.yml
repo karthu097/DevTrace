@@ -1,0 +1,29 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build and Test with Maven
+      working-directory: ./devtrace-platform
+      run: ./mvnw clean verify
+      
+    - name: Build Docker Image
+      if: github.ref == 'refs/heads/main'
+      working-directory: ./devtrace-platform
+      run: docker build -t devtrace-platform:latest .

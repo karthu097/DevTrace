@@ -1,0 +1,154 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: devtrace-postgres
+    environment:
+      POSTGRES_DB: devtrace
+      POSTGRES_USER: devtrace
+      POSTGRES_PASSWORD: devtrace
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devtrace -d devtrace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: devtrace-jaeger
+    ports:
+      - "16686:16686"
+      - "4317"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: devtrace-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - jaeger
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: devtrace-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      ORDER_SERVICE_URL: http://order-service:8081
+      OTEL_SERVICE_NAME: devtrace-api-gateway
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    depends_on:
+      order-service:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: ./order-service
+    container_name: devtrace-order-service
+    ports:
+      - "8081:8081"
+    environment:
+      INVENTORY_SERVICE_URL: http://inventory-service:8082
+      PAYMENT_SERVICE_URL: http://payment-service:8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/devtrace
+      SPRING_DATASOURCE_USERNAME: devtrace
+      SPRING_DATASOURCE_PASSWORD: devtrace
+      OTEL_SERVICE_NAME: devtrace-order-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    depends_on:
+      inventory-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+    container_name: devtrace-inventory-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/devtrace
+      SPRING_DATASOURCE_USERNAME: devtrace
+      SPRING_DATASOURCE_PASSWORD: devtrace
+      OTEL_SERVICE_NAME: devtrace-inventory-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payment-service:
+    build:
+      context: ./payment-service
+    container_name: devtrace-payment-service
+    ports:
+      - "8083:8083"
+    environment:
+      PAYMENT_PROVIDER_URL: http://payment-provider:8084
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/devtrace
+      SPRING_DATASOURCE_USERNAME: devtrace
+      SPRING_DATASOURCE_PASSWORD: devtrace
+      OTEL_SERVICE_NAME: devtrace-payment-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    depends_on:
+      postgres:
+        condition: service_healthy
+      payment-provider:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payment-provider:
+    build:
+      context: ./payment-provider
+    container_name: devtrace-payment-provider
+    ports:
+      - "8084:8084"
+    environment:
+      OTEL_SERVICE_NAME: devtrace-payment-provider
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  devtrace-platform:
+    build:
+      context: ../devtrace-platform
+    container_name: devtrace-platform
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/devtrace
+      SPRING_DATASOURCE_USERNAME: devtrace
+      SPRING_DATASOURCE_PASSWORD: devtrace
+    depends_on:
+      postgres:
+        condition: service_healthy

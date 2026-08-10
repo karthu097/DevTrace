@@ -1,0 +1,23 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: payment-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/devtrace}
+    username: ${SPRING_DATASOURCE_USERNAME:devtrace}
+    password: ${SPRING_DATASOURCE_PASSWORD:devtrace}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+payment-provider:
+  url: ${PAYMENT_PROVIDER_URL:http://localhost:8084}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

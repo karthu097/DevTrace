@@ -1,0 +1,11 @@
+package com.devtrace.order.exception;
+
+public enum ErrorCode {
+    INVENTORY_UNAVAILABLE,
+    INSUFFICIENT_INVENTORY,
+    PAYMENT_PROVIDER_UNAVAILABLE,
+    PAYMENT_TIMEOUT,
+    PAYMENT_FAILED,
+    ORDER_FAILED,
+    INTERNAL_ERROR
+}

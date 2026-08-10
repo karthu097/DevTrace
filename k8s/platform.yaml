@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devtrace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devtrace-platform
+  namespace: devtrace
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devtrace-platform
+  template:
+    metadata:
+      labels:
+        app: devtrace-platform
+    spec:
+      containers:
+      - name: platform
+        image: devtrace-platform:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8085
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: DATABASE_URL
+          value: "jdbc:postgresql://postgres:5432/devtrace"
+        - name: DATABASE_USERNAME
+          value: "devtrace_user"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: devtrace-secrets
+              key: database-password
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8085
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devtrace-platform
+  namespace: devtrace
+spec:
+  selector:
+    app: devtrace-platform
+  ports:
+  - port: 8085
+    targetPort: 8085

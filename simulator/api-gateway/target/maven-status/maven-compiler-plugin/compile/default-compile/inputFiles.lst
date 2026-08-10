@@ -1,0 +1,6 @@
+C:\Users\karth\Downloads\DevTrace\simulator\api-gateway\src\main\java\com\devtrace\gateway\ApiGatewayApplication.java
+C:\Users\karth\Downloads\DevTrace\simulator\api-gateway\src\main\java\com\devtrace\gateway\client\OrderClient.java
+C:\Users\karth\Downloads\DevTrace\simulator\api-gateway\src\main\java\com\devtrace\gateway\controller\GatewayController.java
+C:\Users\karth\Downloads\DevTrace\simulator\api-gateway\src\main\java\com\devtrace\gateway\dto\CreateOrderRequest.java
+C:\Users\karth\Downloads\DevTrace\simulator\api-gateway\src\main\java\com\devtrace\gateway\dto\OrderResponse.java
+C:\Users\karth\Downloads\DevTrace\simulator\api-gateway\src\main\java\com\devtrace\gateway\util\RequestIdUtil.java

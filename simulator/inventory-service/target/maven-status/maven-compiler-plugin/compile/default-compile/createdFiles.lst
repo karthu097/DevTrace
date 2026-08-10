@@ -1,0 +1,12 @@
+com\devtrace\inventory\exception\ErrorCode.class
+com\devtrace\inventory\model\Product.class
+com\devtrace\inventory\entity\InventoryItem.class
+com\devtrace\inventory\exception\GlobalExceptionHandler.class
+com\devtrace\inventory\InventoryServiceApplication.class
+com\devtrace\inventory\logging\StructuredLogger.class
+com\devtrace\inventory\controller\InventoryController.class
+com\devtrace\inventory\service\InventoryService.class
+com\devtrace\inventory\exception\ErrorResponse.class
+com\devtrace\inventory\repository\InventoryRepository.class
+com\devtrace\inventory\model\FailureMode.class
+com\devtrace\inventory\exception\ServiceException.class

@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------
+  # DEVTRACE PLATFORM CORE
+  # ----------------------------------------------------
+  devtrace-ui:
+    build:
+      context: ./devtrace-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - devtrace-platform
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  devtrace-platform:
+    build:
+      context: ./devtrace-platform
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/devtrace
+      - DATABASE_USERNAME=devtrace_user
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-devtrace_pass}
+      - DEVTRACE_AI_ENABLED=true
+      - DEVTRACE_AI_PROVIDER=openai
+      - DEVTRACE_AI_API_KEY=${AI_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=devtrace
+      - POSTGRES_USER=devtrace_user
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-devtrace_pass}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devtrace_user -d devtrace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  # ----------------------------------------------------
+  # OBSERVABILITY PIPELINE
+  # ----------------------------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./simulator/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    depends_on:
+      - devtrace-platform
+      - jaeger
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # UI
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  # ----------------------------------------------------
+  # SIMULATOR MICROSERVICES
+  # ----------------------------------------------------
+  api-gateway:
+    build:
+      context: ./simulator
+      dockerfile: api-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./simulator
+      dockerfile: order-service/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - INVENTORY_SERVICE_URL=http://inventory-service:8082
+      - PAYMENT_SERVICE_URL=http://payment-service:8083
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  inventory-service:
+    build:
+      context: ./simulator
+      dockerfile: inventory-service/Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./simulator
+      dockerfile: payment-service/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - PAYMENT_PROVIDER_URL=http://payment-provider:8084
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+  payment-provider:
+    build:
+      context: ./simulator
+      dockerfile: payment-provider/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    networks:
+      - devtrace-network
+    restart: unless-stopped
+
+networks:
+  devtrace-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
