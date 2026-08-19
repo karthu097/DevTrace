@@ -225,6 +225,6 @@ DevTrace was built to demonstrate practical knowledge of:
 
 ## 👨‍💻 Author
 
-**karthu097**
+**Karthikeya Chandrapati**
 
 Built as a hands-on project to explore distributed systems, backend engineering, and observability.
